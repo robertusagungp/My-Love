@@ -1,0 +1,1871 @@
+:root {
+  --bg-obsidian-maroon: #110307;
+  --bg-velvet-deep: #1e050d;
+  --bg-velvet-maroon: #310815;
+  --surface-maroon-card: rgba(45, 9, 21, 0.78);
+  --surface-maroon-elevated: rgba(68, 13, 30, 0.85);
+  --border-maroon-subtle: rgba(229, 195, 132, 0.22);
+  --border-gold-strong: rgba(229, 195, 132, 0.58);
+
+  --gold-champagne: #e5c384;
+  --gold-bright: #fff1cc;
+  --gold-amber: #f5b958;
+  --gold-antique: #b68c46;
+
+  --rose-maroon-accent: #8f1d3f;
+  --rose-soft: #e09ba9;
+
+  --text-silk-ivory: #faf3eb;
+  --text-warm-cream: #efe2d3;
+  --text-muted-rose: #cfb3ba;
+
+  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --shadow-velvet: 0 24px 60px rgba(5, 0, 2, 0.72), 0 0 40px rgba(107, 19, 43, 0.28);
+  --shadow-gold-glow: 0 0 28px rgba(229, 195, 132, 0.26);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  background-color: var(--bg-obsidian-maroon);
+  color: var(--text-silk-ivory);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  selection-background-color: var(--rose-maroon-accent);
+}
+
+::selection {
+  background: var(--rose-maroon-accent);
+  color: var(--gold-bright);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+/* =========================================================
+   ROOT STAGE & WEBGL CANVAS
+   ========================================================= */
+.sanctuary-app-root {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-x: hidden;
+}
+
+.sanctuary-webgl-canvas,
+.sanctuary-fallback-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.sanctuary-fallback-bg {
+  background: radial-gradient(circle at 50% 25%, #460b1d 0%, #1c040b 55%, #0d0205 100%);
+}
+
+.sanctuary-vignette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(245, 185, 88, 0.08) 0%, transparent 55%),
+    radial-gradient(circle at 50% 50%, transparent 35%, rgba(12, 2, 5, 0.82) 100%);
+}
+
+.sanctuary-stage-main {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5.25rem 1.15rem 4.25rem;
+}
+
+/* =========================================================
+   TOP HUD BAR & CHAPTER DRAWER
+   ========================================================= */
+.hud-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  background: linear-gradient(180deg, rgba(17, 3, 7, 0.92) 0%, rgba(17, 3, 7, 0.45) 75%, transparent 100%);
+  backdrop-filter: blur(8px);
+}
+
+.hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.hud-icon-gold,
+.gold-text {
+  color: var(--gold-champagne);
+}
+
+.hud-brand-text {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--gold-champagne);
+}
+
+.hud-center-indicator {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hud-center-indicator {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.hud-act-pill {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted-rose);
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 195, 132, 0.2);
+  background: rgba(34, 6, 15, 0.65);
+}
+
+.hud-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 38px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+  color: var(--gold-bright);
+  background: rgba(58, 10, 25, 0.78);
+  border: 1px solid var(--border-maroon-subtle);
+  transition: all 0.25s ease;
+}
+
+.hud-btn:hover {
+  border-color: var(--gold-champagne);
+  box-shadow: var(--shadow-gold-glow);
+}
+
+.hud-btn-label {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .hud-btn-label {
+    display: inline;
+  }
+}
+
+/* Chapter Selection Modal Drawer */
+.chapter-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(10, 2, 5, 0.82);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.chapter-drawer {
+  width: min(100%, 390px);
+  height: 100%;
+  background: linear-gradient(165deg, #250610 0%, #130308 100%);
+  border-left: 1px solid var(--border-maroon-subtle);
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+}
+
+.chapter-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(229, 195, 132, 0.16);
+}
+
+.chapter-drawer-eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  color: var(--gold-champagne);
+  margin-bottom: 0.25rem;
+}
+
+.chapter-drawer-title {
+  font-family: var(--font-serif);
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: var(--text-silk-ivory);
+}
+
+.hud-btn-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-maroon-subtle);
+  color: var(--gold-champagne);
+}
+
+.chapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.chapter-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.8rem 0.95rem;
+  border-radius: 14px;
+  background: rgba(45, 9, 21, 0.52);
+  border: 1px solid rgba(229, 195, 132, 0.12);
+  transition: all 0.22s ease;
+}
+
+.chapter-list-item:hover,
+.chapter-list-item.is-active {
+  background: rgba(107, 19, 43, 0.65);
+  border-color: var(--gold-champagne);
+}
+
+.chapter-numeral {
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold-champagne);
+  min-width: 54px;
+}
+
+.chapter-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.chapter-name {
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--text-silk-ivory);
+}
+
+.chapter-sub {
+  font-size: 0.76rem;
+  color: var(--text-muted-rose);
+}
+
+/* =========================================================
+   SHARED TYPOGRAPHY & BUTTONS
+   ========================================================= */
+.act-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.act-container {
+  width: min(100%, 1060px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.85rem;
+}
+
+.act-header-center {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.act-eyebrow {
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-champagne);
+}
+
+.act-headline {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4.8vw, 3.35rem);
+  font-weight: 600;
+  line-height: 1.12;
+  color: var(--text-silk-ivory);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+}
+
+.act-subtitle {
+  font-size: clamp(0.95rem, 1.8vw, 1.08rem);
+  line-height: 1.68;
+  color: var(--text-warm-cream);
+  max-width: 620px;
+}
+
+.gold-pill-badge {
+  display: inline-block;
+  padding: 0.35rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--gold-bright);
+  background: linear-gradient(90deg, rgba(107, 19, 43, 0.85), rgba(65, 11, 27, 0.85));
+  border: 1px solid var(--border-gold-strong);
+  box-shadow: var(--shadow-gold-glow);
+}
+
+.btn-gold-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding: 0.85rem 1.65rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #1a040a;
+  background: linear-gradient(135deg, #fff2ce 0%, #e5c384 52%, #c69749 100%);
+  box-shadow: 0 10px 28px rgba(229, 195, 132, 0.3), inset 0 1px 1px #ffffff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-gold-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(229, 195, 132, 0.45), inset 0 1px 1px #ffffff;
+}
+
+.btn-gold-primary:active {
+  transform: translateY(0);
+}
+
+.btn-gold-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 46px;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--gold-bright);
+  background: rgba(68, 13, 30, 0.65);
+  border: 1px solid var(--gold-champagne);
+  transition: all 0.25s ease;
+}
+
+.btn-gold-outline:hover {
+  background: rgba(107, 19, 43, 0.85);
+  box-shadow: var(--shadow-gold-glow);
+}
+
+.btn-velvet-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.7rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--text-warm-cream);
+  background: rgba(42, 8, 19, 0.72);
+  border: 1px solid var(--border-maroon-subtle);
+  transition: all 0.22s ease;
+}
+
+.btn-velvet-secondary:hover:not(:disabled) {
+  border-color: var(--gold-champagne);
+  color: var(--gold-bright);
+}
+
+.btn-velvet-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-text-subtle,
+.btn-text-gold {
+  font-size: 0.84rem;
+  padding: 0.45rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-text-subtle {
+  color: var(--text-muted-rose);
+}
+
+.btn-text-gold {
+  color: var(--gold-champagne);
+  font-weight: 500;
+}
+
+.act-bottom-cta,
+.act-bottom-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* =========================================================
+   ACT I — THE INVITATION
+   ========================================================= */
+.invitation-card {
+  width: min(100%, 610px);
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3.2rem) clamp(1.35rem, 4vw, 2.75rem);
+  border-radius: 28px;
+  background: linear-gradient(165deg, rgba(48, 9, 22, 0.84) 0%, rgba(20, 4, 10, 0.92) 100%);
+  border: 1px solid var(--border-maroon-subtle);
+  box-shadow: var(--shadow-velvet);
+  backdrop-filter: blur(14px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.candle-emblem-wrapper {
+  position: relative;
+  width: 68px;
+  height: 82px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.candle-halo-outer {
+  position: absolute;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(247, 185, 85, 0.35) 0%, transparent 72%);
+  animation: pulseHalo 3.2s ease-in-out infinite;
+}
+
+.candle-halo-inner {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 238, 186, 0.65) 0%, transparent 75%);
+}
+
+.candle-flame {
+  width: 14px;
+  height: 28px;
+  border-radius: 50% 50% 35% 35%;
+  background: linear-gradient(180deg, #ffffff 0%, #ffe28a 45%, #f0942b 90%);
+  box-shadow: 0 0 18px #f7b955, 0 0 34px rgba(247, 185, 85, 0.65);
+  animation: candleFlicker 2.6s ease-in-out infinite alternate;
+}
+
+.candle-wick {
+  width: 2px;
+  height: 6px;
+  background: #4e342e;
+}
+
+@keyframes candleFlicker {
+  0% {
+    transform: scale(1) rotate(-1.5deg);
+  }
+  50% {
+    transform: scale(1.05, 0.97) rotate(1.5deg);
+  }
+  100% {
+    transform: scale(0.97, 1.04) rotate(-1deg);
+  }
+}
+
+@keyframes pulseHalo {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
+
+.invitation-recipient-name {
+  font-family: var(--font-serif);
+  font-size: clamp(2.35rem, 6vw, 3.7rem);
+  font-weight: 600;
+  font-style: italic;
+  color: var(--gold-bright);
+  letter-spacing: 0.02em;
+  line-height: 1.08;
+}
+
+.invitation-greetings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.invitation-line {
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 2.8vw, 1.5rem);
+  color: var(--text-silk-ivory);
+}
+
+.invitation-line-1,
+.invitation-line-2 {
+  color: var(--gold-champagne);
+  font-style: italic;
+}
+
+.invitation-subtext {
+  font-size: 0.96rem;
+  line-height: 1.72;
+  color: var(--text-warm-cream);
+  max-width: 490px;
+}
+
+.invitation-cta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+  width: 100%;
+}
+
+.btn-begin-story {
+  width: min(100%, 290px);
+  font-size: 1rem;
+}
+
+.invitation-audio-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-muted-rose);
+}
+
+.invitation-footer-signature {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  width: 100%;
+  border-top: 1px solid rgba(229, 195, 132, 0.14);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-champagne);
+}
+
+/* =========================================================
+   ACT II — VELVET ROSE SANCTUARY
+   ========================================================= */
+.sanctuary-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.sanctuary-recipient-display {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  font-style: italic;
+  color: var(--gold-champagne);
+}
+
+.sanctuary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (min-width: 860px) {
+  .sanctuary-grid {
+    grid-template-columns: 5fr 6fr;
+    gap: 2.75rem;
+  }
+}
+
+.sanctuary-portrait-stage {
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.portrait-velvet-frame {
+  position: relative;
+  width: min(100%, 400px);
+  border-radius: 24px;
+  padding: 0.65rem;
+  background: linear-gradient(145deg, rgba(107, 19, 43, 0.9), rgba(28, 5, 12, 0.95));
+  border: 1px solid var(--border-gold-strong);
+  box-shadow: var(--shadow-velvet), var(--shadow-gold-glow);
+  transition: transform 0.2s ease-out;
+  overflow: hidden;
+}
+
+.sanctuary-hero-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 18px;
+  display: block;
+}
+
+.portrait-candle-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 80% 70%, rgba(247, 185, 85, 0.22) 0%, transparent 60%);
+}
+
+.portrait-caption-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.5rem 0.25rem;
+  font-size: 0.78rem;
+  color: var(--gold-bright);
+}
+
+.sanctuary-story-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.math-formula-card {
+  padding: 1.1rem 1.3rem;
+  border-radius: 18px;
+  background: rgba(45, 8, 20, 0.78);
+  border: 1px solid var(--border-maroon-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.math-formula-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  color: var(--gold-champagne);
+}
+
+.math-formula-code {
+  font-family: var(--font-serif);
+  font-size: clamp(1.25rem, 2.6vw, 1.65rem);
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+
+.math-formula-sub {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--text-muted-rose);
+}
+
+.sanctuary-lead-paragraph {
+  font-size: 1.02rem;
+  line-height: 1.78;
+  color: var(--text-silk-ivory);
+}
+
+.sanctuary-quote-box {
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--gold-champagne);
+  background: rgba(68, 13, 30, 0.48);
+  border-radius: 0 14px 14px 0;
+  font-family: var(--font-serif);
+  font-size: 1.18rem;
+  font-style: italic;
+  color: var(--gold-bright);
+}
+
+.secret-whisper-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem;
+  border-radius: 16px;
+  background: rgba(107, 19, 43, 0.58);
+  border: 1px solid var(--gold-champagne);
+  font-size: 0.9rem;
+  line-height: 1.62;
+  color: var(--text-silk-ivory);
+}
+
+/* =========================================================
+   ACT III — LOVE STORY & EQUATION OF US
+   ========================================================= */
+.milestone-Equation-ribbon {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+@media (min-width: 720px) {
+  .milestone-Equation-ribbon {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.milestone-node-btn {
+  padding: 0.8rem 0.7rem;
+  border-radius: 16px;
+  background: rgba(42, 8, 19, 0.7);
+  border: 1px solid var(--border-maroon-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+  transition: all 0.22s ease;
+}
+
+.milestone-node-btn.is-selected {
+  background: linear-gradient(145deg, rgba(118, 21, 48, 0.92), rgba(58, 10, 24, 0.95));
+  border-color: var(--gold-champagne);
+  box-shadow: var(--shadow-gold-glow);
+  transform: translateY(-2px);
+}
+
+.milestone-math-symbol {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--gold-champagne);
+}
+
+.milestone-node-era {
+  font-size: 0.75rem;
+  color: var(--text-warm-cream);
+  font-weight: 500;
+}
+
+.milestone-cinema-card {
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 24px;
+  background: var(--surface-maroon-card);
+  border: 1px solid var(--border-gold-strong);
+  box-shadow: var(--shadow-velvet);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.milestone-card-playful {
+  background: linear-gradient(160deg, rgba(92, 16, 38, 0.86), rgba(38, 7, 17, 0.92));
+}
+
+.milestone-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.milestone-chapter-code {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--gold-champagne);
+}
+
+.milestone-equation-tag {
+  font-size: 0.76rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(229, 195, 132, 0.14);
+  color: var(--gold-bright);
+}
+
+.milestone-title-id {
+  font-family: var(--font-serif);
+  font-size: clamp(1.65rem, 3.6vw, 2.35rem);
+  font-weight: 600;
+  color: var(--text-silk-ivory);
+}
+
+.milestone-title-en {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--gold-champagne);
+  margin-top: -0.6rem;
+}
+
+.milestone-narrative {
+  font-size: 1rem;
+  line-height: 1.78;
+  color: var(--text-warm-cream);
+}
+
+.milestone-highlight-box {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.2rem;
+  border-radius: 16px;
+  background: rgba(24, 4, 10, 0.65);
+  border: 1px solid rgba(229, 195, 132, 0.28);
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--gold-bright);
+}
+
+.milestone-step-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(229, 195, 132, 0.15);
+}
+
+.milestone-counter {
+  font-size: 0.82rem;
+  color: var(--text-muted-rose);
+  letter-spacing: 0.1em;
+}
+
+/* =========================================================
+   ACT IV — THE MEMORY CONSTELLATION
+   ========================================================= */
+.constellation-star-map {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  padding: 1rem 0.5rem;
+  align-items: center;
+}
+
+.constellation-connecting-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star-orb-button {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.75rem 0.4rem;
+  border-radius: 18px;
+  background: rgba(34, 6, 15, 0.72);
+  border: 1px solid var(--border-maroon-subtle);
+  transition: all 0.25s ease;
+}
+
+.star-orb-button.is-active {
+  background: rgba(107, 19, 43, 0.85);
+  border-color: var(--gold-champagne);
+  box-shadow: var(--shadow-gold-glow);
+  transform: translateY(-3px);
+}
+
+.star-orb-core {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(229, 195, 132, 0.18);
+  border: 1px solid var(--gold-champagne);
+}
+
+.star-orb-button.is-active .star-orb-core {
+  background: var(--gold-champagne);
+}
+
+.star-orb-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--gold-bright);
+}
+
+.star-orb-index {
+  font-size: 0.7rem;
+  color: var(--text-muted-rose);
+}
+
+.constellation-detail-stage {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+  padding: clamp(1.25rem, 3.5vw, 2.2rem);
+  border-radius: 26px;
+  background: var(--surface-maroon-card);
+  border: 1px solid var(--border-gold-strong);
+  box-shadow: var(--shadow-velvet);
+  align-items: center;
+}
+
+@media (min-width: 820px) {
+  .constellation-detail-stage {
+    grid-template-columns: 5fr 7fr;
+  }
+}
+
+.constellation-portrait-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.constellation-img-wrapper {
+  width: min(100%, 340px);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--gold-champagne);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+}
+
+.constellation-portrait-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  display: block;
+}
+
+.constellation-coord-badge {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-champagne);
+}
+
+.constellation-text-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.constellation-star-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  color: var(--gold-champagne);
+}
+
+.constellation-node-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  color: var(--text-silk-ivory);
+}
+
+.constellation-node-subtitle {
+  font-size: 0.9rem;
+  color: var(--gold-champagne);
+  font-weight: 500;
+  margin-top: -0.45rem;
+}
+
+.constellation-node-reflection {
+  font-size: 0.98rem;
+  line-height: 1.76;
+  color: var(--text-warm-cream);
+}
+
+.constellation-note-plaque {
+  padding: 0.95rem 1.15rem;
+  border-radius: 14px;
+  background: rgba(23, 4, 10, 0.68);
+  border-left: 3px solid var(--gold-champagne);
+  font-family: var(--font-serif);
+  font-size: 1.14rem;
+  font-style: italic;
+  color: var(--gold-bright);
+}
+
+.constellation-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+/* =========================================================
+   ACT V — THE LITTLE THINGS I LOVE ABOUT MY BOSS
+   ========================================================= */
+.nickname-meter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  background: rgba(58, 10, 25, 0.78);
+  border: 1px solid var(--border-gold-strong);
+  margin-top: 0.35rem;
+}
+
+.nickname-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gold-bright);
+}
+
+.nickname-divider {
+  color: var(--gold-champagne);
+}
+
+.adoration-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.1rem;
+}
+
+@media (min-width: 680px) {
+  .adoration-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 980px) {
+  .adoration-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.adoration-velvet-card {
+  padding: 1.35rem;
+  border-radius: 20px;
+  background: var(--surface-maroon-card);
+  border: 1px solid var(--border-maroon-subtle);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.85rem;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.adoration-velvet-card:hover,
+.adoration-velvet-card.is-focused {
+  background: var(--surface-maroon-elevated);
+  border-color: var(--gold-champagne);
+  box-shadow: var(--shadow-gold-glow);
+  transform: translateY(-3px);
+}
+
+.adoration-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.adoration-badge {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-champagne);
+  font-weight: 600;
+}
+
+.adoration-tag {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.tag-boss {
+  background: rgba(229, 195, 132, 0.2);
+  color: var(--gold-bright);
+}
+
+.tag-sayang {
+  background: rgba(143, 29, 63, 0.55);
+  color: #ffd7e0;
+}
+
+.adoration-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.42rem;
+  color: var(--text-silk-ivory);
+}
+
+.adoration-card-desc {
+  font-size: 0.9rem;
+  line-height: 1.68;
+  color: var(--text-warm-cream);
+}
+
+.adoration-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(229, 195, 132, 0.14);
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--gold-champagne);
+}
+
+/* =========================================================
+   ACT VI — THE SACRED LETTER & AMSAL 3:5–6
+   ========================================================= */
+.letter-narrow-container {
+  max-width: 780px;
+}
+
+.sacred-letter-parchment {
+  position: relative;
+  padding: clamp(1.75rem, 5vw, 3.25rem);
+  border-radius: 26px;
+  background: linear-gradient(170deg, rgba(44, 8, 20, 0.92) 0%, rgba(22, 4, 10, 0.96) 100%);
+  border: 1px solid var(--border-gold-strong);
+  box-shadow: var(--shadow-velvet), 0 0 50px rgba(245, 185, 88, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.letter-wax-crest {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  margin: 0 auto;
+  background: radial-gradient(circle, #9e1b40 0%, #590b22 100%);
+  border: 2px solid var(--gold-champagne);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--gold-bright);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.letter-top-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-champagne);
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(229, 195, 132, 0.18);
+}
+
+.btn-reveal-all-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--gold-bright);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 195, 132, 0.35);
+}
+
+.letter-salutation {
+  font-family: var(--font-serif);
+  font-size: clamp(1.45rem, 3.2vw, 1.95rem);
+  font-style: italic;
+  color: var(--gold-bright);
+}
+
+.letter-body-paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.letter-paragraph {
+  font-size: clamp(0.98rem, 1.9vw, 1.08rem);
+  line-height: 1.86;
+  color: var(--text-silk-ivory);
+}
+
+.letter-progressive-control {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
+.letter-climax-reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.scripture-gold-plaque {
+  padding: 1.4rem 1.5rem;
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(107, 19, 43, 0.55), rgba(32, 5, 14, 0.88));
+  border: 1px solid var(--gold-champagne);
+  box-shadow: var(--shadow-gold-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.scripture-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--gold-champagne);
+}
+
+.scripture-verse-text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.22rem, 2.5vw, 1.5rem);
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--gold-bright);
+}
+
+.scripture-reflection-note {
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--text-warm-cream);
+}
+
+.letter-signature-block {
+  text-align: right;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(229, 195, 132, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.letter-closing-greeting {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-style: italic;
+  color: var(--gold-champagne);
+}
+
+.letter-signature-handwritten {
+  font-family: var(--font-serif);
+  font-size: 2.1rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--gold-bright);
+}
+
+.letter-signature-role {
+  font-size: 0.82rem;
+  color: var(--text-muted-rose);
+}
+
+/* =========================================================
+   ACT VII — MAKE A 29th BIRTHDAY WISH
+   ========================================================= */
+.wish-container {
+  max-width: 720px;
+}
+
+.wish-sanctuary-stage {
+  padding: clamp(1.75rem, 4.5vw, 2.8rem);
+  border-radius: 28px;
+  background: var(--surface-maroon-card);
+  border: 1px solid var(--border-gold-strong);
+  box-shadow: var(--shadow-velvet);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.65rem;
+}
+
+.wish-sanctuary-stage.is-celebrating {
+  border-color: var(--gold-bright);
+  box-shadow: var(--shadow-velvet), 0 0 65px rgba(245, 185, 88, 0.35);
+}
+
+.birthday-candle-sculpture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.twenty-nine-ring {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold-champagne);
+  background: rgba(107, 19, 43, 0.55);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-gold-glow);
+}
+
+.ring-number {
+  font-family: var(--font-serif);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+.interactive-candle-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.wish-flame-assembly {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.25rem;
+}
+
+.wish-flame-aura {
+  position: absolute;
+  top: -16px;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(247, 185, 85, 0.55) 0%, transparent 72%);
+  animation: pulseHalo 2.2s infinite;
+}
+
+.wish-flame-core {
+  width: 24px;
+  height: 44px;
+  border-radius: 50% 50% 35% 35%;
+  background: linear-gradient(180deg, #ffffff 0%, #ffe699 45%, #f39223 95%);
+  box-shadow: 0 0 24px #f7b955, 0 0 48px rgba(247, 185, 85, 0.85);
+  animation: candleFlicker 2s infinite alternate;
+}
+
+.wish-tap-hint {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: var(--gold-bright);
+}
+
+.candle-pillar-body {
+  width: 96px;
+  height: 95px;
+  border-radius: 12px 12px 6px 6px;
+  background: linear-gradient(90deg, #5e0f26 0%, #8c1b3d 50%, #4b0b1e 100%);
+  border: 1px solid var(--gold-champagne);
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 4px 12px rgba(255, 255, 255, 0.18);
+}
+
+.candle-pillar-engraving {
+  font-family: var(--font-serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-champagne);
+}
+
+.wish-starburst-emblem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.wish-granted-badge {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+
+.wish-guidance-box,
+.wish-celebration-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  max-width: 540px;
+}
+
+.wish-step-line {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--text-warm-cream);
+}
+
+.wish-action-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  width: 100%;
+}
+
+.mic-listening-pill {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: rgba(107, 19, 43, 0.8);
+  border: 1px solid var(--gold-champagne);
+  font-size: 0.84rem;
+  color: var(--gold-bright);
+}
+
+.mic-error-note {
+  font-size: 0.8rem;
+  color: var(--rose-soft);
+}
+
+.wish-blessing-paragraph {
+  font-size: 1.04rem;
+  line-height: 1.75;
+  color: var(--text-silk-ivory);
+}
+
+.scripture-mini-blessing {
+  padding: 1.1rem 1.3rem;
+  border-radius: 16px;
+  background: rgba(24, 4, 11, 0.72);
+  border: 1px solid var(--border-maroon-subtle);
+  font-family: var(--font-serif);
+  font-size: 1.12rem;
+  font-style: italic;
+  color: var(--gold-bright);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.scripture-mini-blessing span {
+  font-size: 0.82rem;
+  font-style: normal;
+  letter-spacing: 0.12em;
+  color: var(--gold-champagne);
+}
+
+/* =========================================================
+   ACT VIII — ONE LAST SURPRISE (WAX ENVELOPE & 5 PROMISES)
+   ========================================================= */
+.wax-envelope-stage {
+  display: flex;
+  justify-content: center;
+}
+
+.velvet-sealed-envelope {
+  width: min(100%, 560px);
+  padding: clamp(2rem, 5vw, 3rem);
+  border-radius: 26px;
+  background: linear-gradient(155deg, #4b0d20 0%, #21050e 100%);
+  border: 1px solid var(--gold-champagne);
+  box-shadow: var(--shadow-velvet), var(--shadow-gold-glow);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.15rem;
+}
+
+.envelope-top-tag {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--gold-champagne);
+}
+
+.envelope-recipient {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  color: var(--text-silk-ivory);
+}
+
+.envelope-desc {
+  font-size: 0.94rem;
+  color: var(--text-warm-cream);
+  max-width: 420px;
+  line-height: 1.65;
+}
+
+.wax-seal-btn {
+  margin-top: 0.5rem;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #b02048 0%, #630c25 75%, #3d0616 100%);
+  border: 2px solid var(--gold-champagne);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65), 0 0 25px rgba(229, 195, 132, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.wax-seal-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 35px rgba(229, 195, 132, 0.55);
+}
+
+.wax-seal-monogram {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+.wax-seal-sub {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-champagne);
+}
+
+.covenant-capsule-revealed {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.promises-list-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.95rem;
+}
+
+@media (min-width: 768px) {
+  .promises-list-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.promise-velvet-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 20px;
+  background: var(--surface-maroon-card);
+  border: 1px solid var(--border-maroon-subtle);
+}
+
+.promise-roman-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(229, 195, 132, 0.16);
+  border: 1px solid var(--gold-champagne);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+.promise-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.promise-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  color: var(--gold-bright);
+}
+
+.promise-text {
+  font-size: 0.9rem;
+  line-height: 1.66;
+  color: var(--text-warm-cream);
+}
+
+.husband-prayer-card {
+  padding: 1.5rem;
+  border-radius: 22px;
+  background: linear-gradient(155deg, rgba(107, 19, 43, 0.62), rgba(26, 4, 11, 0.9));
+  border: 1px solid var(--gold-champagne);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.prayer-card-header,
+.prayer-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-champagne);
+}
+
+.prayer-body-text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.15rem, 2.3vw, 1.38rem);
+  font-style: italic;
+  line-height: 1.65;
+  color: var(--text-silk-ivory);
+}
+
+/* =========================================================
+   ACT IX — FOREVER, MY LOVE (FINALE)
+   ========================================================= */
+.finale-container {
+  max-width: 780px;
+  text-align: center;
+  align-items: center;
+}
+
+.finale-portraits-duo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.finale-portrait-card {
+  width: 155px;
+  height: 195px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1.5px solid var(--gold-champagne);
+  box-shadow: var(--shadow-velvet);
+}
+
+@media (min-width: 560px) {
+  .finale-portrait-card {
+    width: 190px;
+    height: 235px;
+  }
+}
+
+.finale-portrait-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.finale-recipient-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.1rem, 5vw, 3.3rem);
+  color: var(--gold-bright);
+  line-height: 1.15;
+}
+
+.finale-dedication-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.finale-line {
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 2.6vw, 1.55rem);
+  color: var(--text-silk-ivory);
+}
+
+.finale-line-2,
+.finale-line-4 {
+  color: var(--gold-champagne);
+  font-style: italic;
+}
+
+.finale-verse-Echo {
+  max-width: 620px;
+  padding: 1.15rem 1.4rem;
+  border-radius: 18px;
+  background: rgba(45, 9, 21, 0.72);
+  border: 1px solid var(--border-maroon-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.finale-verse-quote {
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  font-style: italic;
+  color: var(--text-warm-cream);
+}
+
+.finale-verse-ref {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-champagne);
+}
+
+.finale-signature-seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-champagne);
+}
+
+.finale-husband-credit {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-style: italic;
+  letter-spacing: 0.03em;
+  color: var(--text-silk-ivory);
+}
+
+.finale-replay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+/* =========================================================
+   BOTTOM PROGRESS DOTS
+   ========================================================= */
+.sanctuary-progress-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 25;
+  padding: 0.65rem 1rem 0.85rem;
+  background: linear-gradient(0deg, rgba(14, 2, 6, 0.9) 0%, transparent 100%);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.progress-dots-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(34, 6, 15, 0.78);
+  border: 1px solid rgba(229, 195, 132, 0.2);
+  pointer-events: auto;
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(229, 195, 132, 0.25);
+  transition: all 0.25s ease;
+}
+
+.progress-dot.is-passed {
+  background: rgba(229, 195, 132, 0.55);
+}
+
+.progress-dot.is-current {
+  width: 24px;
+  background: var(--gold-champagne);
+  box-shadow: 0 0 10px rgba(229, 195, 132, 0.65);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
