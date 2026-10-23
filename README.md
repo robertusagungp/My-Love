@@ -64,6 +64,8 @@ npm run build
 ```
 
 ## Deployment (GitHub + Vercel Auto-Deployment)
+- **Live Production URL:** `https://mylove-ten-eta.vercel.app`
+- **Vercel Project:** `robert-4c9b/mylove`
 - **GitHub Repository:** `https://github.com/robertusagungp/My-Love.git`
 - **Production Branch:** `main`
 - **Framework Preset:** `Vite` (`npm run build` → `dist`)
